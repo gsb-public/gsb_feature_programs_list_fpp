@@ -1,0 +1,199 @@
+<?php
+/**
+ * @file
+ * Code for the GSB Feature Programs List Fpp feature.
+ */
+
+include_once 'gsb_feature_programs_list_fpp.features.inc';
+
+
+function gsb_feature_programs_list_fpp_entity_info_alter(&$entity_info) {
+
+  $entity_info['fieldable_panels_pane']['bundles']['programs_list'] = array(
+    'label' => t('Programs: Homepage Three Across'),
+    'pane category' => t('GSB panes'),
+    'pane top level' => TRUE, // set to true to make this show as a top level icon
+    'admin' => array(
+      'path' => 'admin/structure/fieldable-panels-panes/manage/%fieldable_panels_panes_type',
+      'bundle argument' => 4,
+      // Note that this has all _ replaced with - from the bundle name.
+      'real path' => 'admin/structure/fieldable-panels-panes/manage/programs_list',
+      'access arguments' => array('administer fieldable panels panes'),
+    ),
+  );
+
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node_form().
+ */
+function gsb_feature_programs_list_fpp_form_fieldable_panels_panes_fieldable_panels_pane_content_type_edit_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'fieldable_panels_panes_fieldable_panels_pane_content_type_edit_form' && !empty($form['#bundle']) && $form['#bundle'] == 'programs_list') {
+    $form['#after_build'][] = 'gsb_feature_programs_list_fpp_edit_form_alter';
+  }
+}
+
+/**
+ * Removes the 'none' option for Program Category select
+ */
+function gsb_feature_programs_list_fpp_edit_form_alter($form) {
+  unset($form['field_program_category_unlimited']['und']['#options']['_none']);
+  unset($form['reusable']);
+  return $form;
+}
+
+/**
+ * Implements hook_fieldable_panels_pane_view().
+ */
+function gsb_feature_programs_list_fpp_fieldable_panels_pane_view($entity, $view) {
+
+  // Get the list of program topics ptids
+  $wrapper = entity_metadata_wrapper('fieldable_panels_pane', $entity);
+
+  $topic_ids = array();
+  foreach ($wrapper->field_program_topics as $term) {
+    if ($term->value()) {
+      $topic_ids[] = $term->value()->tid;
+    }
+  };
+
+  $tag_ids = array();
+  foreach ($wrapper->field_tag as $term) {
+    if ($term->value()) {
+      $tag_ids[] = $term->value()->tid;
+    }
+  };
+
+  $category_ids = array();
+  foreach ($wrapper->field_program_category_unlimited as $term) {
+    if ($term->value()) {
+      $category_ids[] = $term->value()->tid;
+    }
+  };
+
+  $query = db_select('node', 'n');
+  $query->fields('n', array('nid', 'status', 'type', 'created'));
+
+  if (!empty($topic_ids)) {
+    $query->join('field_data_field_program_topics', 'pt', "n.nid = pt.entity_id AND pt.entity_type = 'node'");
+    $query->fields('pt', array('field_program_topics_tid'));
+  }
+  if (!empty($tag_ids)) {
+    $query->join('field_data_field_tag', 't', "n.nid = t.entity_id AND t.entity_type = 'node'");
+    $query->fields('t', array('field_tag_tid'));
+  }
+  if (!empty($category_ids)) {
+    $query->join('field_data_field_program_category', 'pc', "n.nid = pc.entity_id AND pc.entity_type = 'node'");
+    $query->fields('pc', array('field_program_category_tid'));
+  }
+
+  $query->condition('n.type', 'program');
+  $query->condition('n.status', '1');
+
+  if (!empty($topic_ids)) {
+    $query->condition('pt.field_program_topics_tid', $topic_ids, 'IN');
+  }
+  if (!empty($tag_ids)) {
+    $query->condition('t.field_tag_tid', $tag_ids, 'IN');
+  }
+  if (!empty($category_ids)) {
+    $query->condition('pc.field_program_category_tid', $category_ids, 'IN');
+  }
+
+  $query->orderBy('created', 'DESC');
+  $query->orderBy('nid', 'DESC');
+  $results = $query->execute();
+
+  // Get the counts of programs that have more than one match
+  $programs = array();
+  foreach ($results as $record) {
+    $programs[$record->nid] = (empty($programs[$record->nid])) ? 1 : $programs[$record->nid] + 1;
+  }
+  // Sort descending so we can find the programs with the most matches
+  arsort($programs);
+  // Only keep the top 3
+  $programs = array_slice($programs, 0, 3, TRUE);
+
+  if (empty($programs)) {
+    unset($entity->content['field_title']);
+    unset($entity->content['field_cta1']);
+    unset($entity->content['field_tag']);
+    unset($entity->content['field_program_topics']);
+    unset($entity->content['field_program_category_unlimited']);
+    return;
+  }
+
+  // Next look-up the most current program instances related to each of these programs
+  $program_instances = _gsb_feature_program_ct_get_current_program_instances(array_keys($programs));
+
+  // Render the top 3 matching programs instances in the 'expore more' wrapper
+  if (!empty($program_instances)) {
+
+    $nodes = node_load_multiple(array_values($program_instances));
+    $content = node_view_multiple($nodes, 'program_explore_other');
+
+    // Wrap content in container.
+    $content_wrapper = array(
+      '#type' => 'container',
+      '#attributes' => array(
+        'class' => array('explore-more-content'),
+      ),
+    );
+    $content_wrapper['content'] = $content;
+
+    // Wrap content and title in container.
+    $container = array(
+      '#type' => 'container',
+      '#attributes' => array(
+        'class' => array('gsb-program-explore-more-wrapper'),
+      ),
+    );
+    $container['content'] = $content_wrapper;
+    $explore_more_container = $container;
+
+    $title = $entity->content['field_title'];
+    $title['#label_display'] = 'hidden';
+    unset($entity->content['field_title']);
+    $title_container = array(
+      '#type' => 'container',
+      '#attributes' => array(
+        'class' => array('gsb-program-fpp-title-wrapper'),
+      ),
+    );
+    $title_container['content'] = $title;
+
+    $cta = $entity->content['field_cta1'];
+    $cta['#label_display'] = 'hidden';
+    unset($entity->content['field_cta1']);
+    $cta_container = array(
+      '#type' => 'container',
+      '#attributes' => array(
+        'class' => array('gsb-program-fpp-cta-wrapper'),
+      ),
+    );
+    $cta_container['content'] = $cta;
+
+    $entity->content['gsb_feature_programs_list_fpp_wrapper'] = array(
+      '#type' => 'container',
+      '#attributes' => array(
+        'class' => array(
+          'gsb-program-list-fpp-wrapper',
+        ),
+      ),
+    );
+    $entity->content['gsb_feature_programs_list_fpp_wrapper']['content']['title'] = $title_container;
+    $entity->content['gsb_feature_programs_list_fpp_wrapper']['content']['explore_more'] = $explore_more_container;
+    $entity->content['gsb_feature_programs_list_fpp_wrapper']['content']['cta_link'] = $cta_container;
+
+  }
+  else {
+    $entity->content['field_cta1']['#label_display'] = 'hidden';
+    $entity->content['field_title']['#label_display'] = 'hidden';
+  }
+
+  unset($entity->content['field_tag']);
+  unset($entity->content['field_program_topics']);
+  unset($entity->content['field_program_category_unlimited']);
+
+}
+
