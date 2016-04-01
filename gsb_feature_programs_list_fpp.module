@@ -47,7 +47,11 @@ function gsb_feature_programs_list_fpp_edit_form_alter($form) {
  */
 function gsb_feature_programs_list_fpp_fieldable_panels_pane_view($entity, $view) {
 
-  // Get the list of program topics ptids
+  if ($entity->bundle != 'programs_list') {
+    return;
+  }
+
+  // Get the list of program topics $topic_ids
   $wrapper = entity_metadata_wrapper('fieldable_panels_pane', $entity);
 
   $topic_ids = array();
