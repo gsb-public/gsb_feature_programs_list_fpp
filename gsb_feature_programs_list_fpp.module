@@ -8,10 +8,9 @@ include_once 'gsb_feature_programs_list_fpp.features.inc';
 
 
 function gsb_feature_programs_list_fpp_entity_info_alter(&$entity_info) {
-
   $entity_info['fieldable_panels_pane']['bundles']['programs_list'] = array(
     'label' => t('Programs: Homepage Three Across'),
-    'pane category' => t('GSB panes'),
+    'pane category' => t('Customizable Content Lists'),
     'pane top level' => TRUE, // set to true to make this show as a top level icon
     'admin' => array(
       'path' => 'admin/structure/fieldable-panels-panes/manage/%fieldable_panels_panes_type',
@@ -199,5 +198,31 @@ function gsb_feature_programs_list_fpp_fieldable_panels_pane_view($entity, $view
   unset($entity->content['field_program_topics']);
   unset($entity->content['field_program_category_unlimited']);
 
+}
+
+function gsb_feature_programs_list_fpp_preprocess_panels_add_content_modal(&$vars) {
+  if (!empty($vars['categories']['root']['content']['Programs: Homepage Three Across'])) {
+    $temp = $vars['categories']['root']['content']['Programs: Homepage Three Across'];
+    unset($vars['categories']['root']['content']['Programs: Homepage Three Across']);
+    $vars['categories']['customizable-content-lists']['content']['Programs: Homepage Three Across'] = $temp;
+    $vars['categories']['customizable-content-lists']['content']['Programs: Homepage Three Across']['category'] = array(
+      '0' => 'Customizable Content Lists',
+      '1' => '0'
+    );
+    unset($vars['categories']['customizable-content-lists']['content']['Programs: Homepage Three Across']['top level']);
+  }
+}
+
+function gsb_feature_programs_list_fpp_process_panels_add_content_modal(&$vars) {
+  if (!empty($vars['categories']['root']['content']['Programs: Homepage Three Across'])) {
+    $temp = $vars['categories']['root']['content']['Programs: Homepage Three Across'];
+    unset($vars['categories']['root']['content']['Programs: Homepage Three Across']);
+    $vars['categories']['customizable-content-lists']['content']['Programs: Homepage Three Across'] = $temp;
+    $vars['categories']['customizable-content-lists']['content']['Programs: Homepage Three Across']['category'] = array(
+      '0' => 'Customizable Content Lists',
+      '1' => '0'
+    );
+    //$vars['categories']['customizable-content-lists']['content']['Programs: Homepage Three Across']['type_name'] = 'views_panes';
+  }
 }
 
