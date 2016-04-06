@@ -10,8 +10,7 @@
 function gsb_feature_programs_list_fpp_field_default_field_instances() {
   $field_instances = array();
 
-  // Exported field_instance:
-  // 'fieldable_panels_pane-programs_list-field_cta1'.
+  // Exported field_instance: 'fieldable_panels_pane-programs_list-field_cta1'.
   $field_instances['fieldable_panels_pane-programs_list-field_cta1'] = array(
     'bundle' => 'programs_list',
     'custom_add_another' => '',
@@ -75,6 +74,47 @@ function gsb_feature_programs_list_fpp_field_default_field_instances() {
   );
 
   // Exported field_instance:
+  // 'fieldable_panels_pane-programs_list-field_key_program_topics'.
+  $field_instances['fieldable_panels_pane-programs_list-field_key_program_topics'] = array(
+    'bundle' => 'programs_list',
+    'custom_add_another' => '',
+    'custom_remove' => '',
+    'default_value' => NULL,
+    'deleted' => 0,
+    'description' => '',
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'module' => 'taxonomy',
+        'settings' => array(
+          'conditions' => array(),
+        ),
+        'type' => 'taxonomy_term_reference_link',
+        'weight' => 5,
+      ),
+    ),
+    'ds_extras_field_template' => '',
+    'entity_type' => 'fieldable_panels_pane',
+    'field_name' => 'field_key_program_topics',
+    'label' => 'Program Key Topic',
+    'required' => 0,
+    'settings' => array(
+      'custom_add_another' => '',
+      'custom_remove' => '',
+      'use_hierarchical_select_lite' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'widget' => array(
+      'active' => 1,
+      'module' => 'options',
+      'settings' => array(),
+      'type' => 'options_select',
+      'weight' => 7,
+    ),
+    'workbench_access_field' => 0,
+  );
+
+  // Exported field_instance:
   // 'fieldable_panels_pane-programs_list-field_program_category_unlimited'.
   $field_instances['fieldable_panels_pane-programs_list-field_program_category_unlimited'] = array(
     'bundle' => 'programs_list',
@@ -110,48 +150,7 @@ function gsb_feature_programs_list_fpp_field_default_field_instances() {
       'module' => 'options',
       'settings' => array(),
       'type' => 'options_select',
-      'weight' => 8,
-    ),
-    'workbench_access_field' => 0,
-  );
-
-  // Exported field_instance:
-  // 'fieldable_panels_pane-programs_list-field_program_topics'.
-  $field_instances['fieldable_panels_pane-programs_list-field_program_topics'] = array(
-    'bundle' => 'programs_list',
-    'custom_add_another' => '',
-    'custom_remove' => '',
-    'default_value' => NULL,
-    'deleted' => 0,
-    'description' => '',
-    'display' => array(
-      'default' => array(
-        'label' => 'above',
-        'module' => 'taxonomy',
-        'settings' => array(
-          'conditions' => array(),
-        ),
-        'type' => 'taxonomy_term_reference_link',
-        'weight' => 3,
-      ),
-    ),
-    'ds_extras_field_template' => '',
-    'entity_type' => 'fieldable_panels_pane',
-    'field_name' => 'field_program_topics',
-    'label' => 'Program Topic',
-    'required' => 0,
-    'settings' => array(
-      'custom_add_another' => '',
-      'custom_remove' => '',
-      'use_hierarchical_select_lite' => 0,
-      'user_register_form' => FALSE,
-    ),
-    'widget' => array(
-      'active' => 1,
-      'module' => 'options',
-      'settings' => array(),
-      'type' => 'options_select',
-      'weight' => 7,
+      'weight' => 9,
     ),
     'workbench_access_field' => 0,
   );
@@ -198,8 +197,7 @@ function gsb_feature_programs_list_fpp_field_default_field_instances() {
     'workbench_access_field' => 0,
   );
 
-  // Exported field_instance:
-  // 'fieldable_panels_pane-programs_list-field_title'.
+  // Exported field_instance: 'fieldable_panels_pane-programs_list-field_title'.
   $field_instances['fieldable_panels_pane-programs_list-field_title'] = array(
     'bundle' => 'programs_list',
     'custom_add_another' => '',
@@ -310,7 +308,7 @@ function gsb_feature_programs_list_fpp_field_default_field_instances() {
   t('CTA');
   t('Keywords');
   t('Program Category');
-  t('Program Topic');
+  t('Program Key Topic');
   t('Title');
 
   return $field_instances;

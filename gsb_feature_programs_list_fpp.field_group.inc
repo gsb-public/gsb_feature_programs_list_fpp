@@ -24,8 +24,8 @@ function gsb_feature_programs_list_fpp_field_group_info() {
     'weight' => '3',
     'children' => array(
       0 => 'field_tag',
-      1 => 'field_program_topics',
-      2 => 'field_program_category_unlimited',
+      1 => 'field_program_category_unlimited',
+      2 => 'field_key_program_topics',
     ),
     'format_type' => 'fieldset',
     'format_settings' => array(

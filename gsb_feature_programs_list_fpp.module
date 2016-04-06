@@ -54,7 +54,7 @@ function gsb_feature_programs_list_fpp_fieldable_panels_pane_view($entity, $view
   $wrapper = entity_metadata_wrapper('fieldable_panels_pane', $entity);
 
   $topic_ids = array();
-  foreach ($wrapper->field_program_topics as $term) {
+  foreach ($wrapper->field_key_program_topics as $term) {
     if ($term->value()) {
       $topic_ids[] = $term->value()->tid;
     }
@@ -78,8 +78,8 @@ function gsb_feature_programs_list_fpp_fieldable_panels_pane_view($entity, $view
   $query->fields('n', array('nid', 'status', 'type', 'created'));
 
   if (!empty($topic_ids)) {
-    $query->join('field_data_field_program_topics', 'pt', "n.nid = pt.entity_id AND pt.entity_type = 'node'");
-    $query->fields('pt', array('field_program_topics_tid'));
+    $query->join('field_data_field_key_program_topics', 'pt', "n.nid = pt.entity_id AND pt.entity_type = 'node'");
+    $query->fields('pt', array('field_key_program_topics_tid'));
   }
   if (!empty($tag_ids)) {
     $query->join('field_data_field_tag', 't', "n.nid = t.entity_id AND t.entity_type = 'node'");
@@ -94,7 +94,7 @@ function gsb_feature_programs_list_fpp_fieldable_panels_pane_view($entity, $view
   $query->condition('n.status', '1');
 
   if (!empty($topic_ids)) {
-    $query->condition('pt.field_program_topics_tid', $topic_ids, 'IN');
+    $query->condition('pt.field_key_program_topics_tid', $topic_ids, 'IN');
   }
   if (!empty($tag_ids)) {
     $query->condition('t.field_tag_tid', $tag_ids, 'IN');
@@ -114,14 +114,12 @@ function gsb_feature_programs_list_fpp_fieldable_panels_pane_view($entity, $view
   }
   // Sort descending so we can find the programs with the most matches
   arsort($programs);
-  // Only keep the top 3
-  $programs = array_slice($programs, 0, 3, TRUE);
 
   if (empty($programs)) {
     unset($entity->content['field_title']);
     unset($entity->content['field_cta1']);
     unset($entity->content['field_tag']);
-    unset($entity->content['field_program_topics']);
+    unset($entity->content['field_key_program_topics']);
     unset($entity->content['field_program_category_unlimited']);
     return;
   }
@@ -129,10 +127,21 @@ function gsb_feature_programs_list_fpp_fieldable_panels_pane_view($entity, $view
   // Next look-up the most current program instances related to each of these programs
   $program_instances = _gsb_feature_program_ct_get_current_program_instances(array_keys($programs));
 
-  // Render the top 3 matching programs instances in the 'expore more' wrapper
-  if (!empty($program_instances)) {
+  // Only keep the top 3 program instances
+  $explore_instances = array();
+  foreach($programs as $pid => $count) {
+    if (!empty($program_instances[$pid])) {
+      $explore_instances[$pid] = $program_instances[$pid];
+    }
+    if (count($explore_instances) >= 3) {
+      break;
+    }
+  }
 
-    $nodes = node_load_multiple(array_values($program_instances));
+  // Render the top 3 matching programs instances in the 'expore more' wrapper
+  if (!empty($explore_instances)) {
+
+    $nodes = node_load_multiple(array_values($explore_instances));
     $content = node_view_multiple($nodes, 'program_explore_other');
 
     // Wrap content in container.
@@ -195,7 +204,7 @@ function gsb_feature_programs_list_fpp_fieldable_panels_pane_view($entity, $view
   }
 
   unset($entity->content['field_tag']);
-  unset($entity->content['field_program_topics']);
+  unset($entity->content['field_key_program_topics']);
   unset($entity->content['field_program_category_unlimited']);
 
 }
