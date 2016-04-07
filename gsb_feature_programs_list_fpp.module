@@ -92,12 +92,13 @@ function gsb_feature_programs_list_fpp_fieldable_panels_pane_view($entity, $view
 
     $query->condition('pt.field_key_program_topics_tid', $topic_ids, 'IN');
 
-    $query->orderBy('created', 'DESC');
-    $query->orderBy('nid', 'DESC');
     $results = $query->execute();
 
     foreach ($results as $record) {
       $programs[$record->nid] = (empty($programs[$record->nid])) ? 1 : $programs[$record->nid] + 1;
+      if ($programs[$record->nid] > $criteria_count) {
+        $programs[$record->nid] = $criteria_count;
+      }
     }
 
   }
@@ -117,12 +118,13 @@ function gsb_feature_programs_list_fpp_fieldable_panels_pane_view($entity, $view
 
     $query->condition('t.field_tag_tid', $tag_ids, 'IN');
 
-    $query->orderBy('created', 'DESC');
-    $query->orderBy('nid', 'DESC');
     $results = $query->execute();
 
     foreach ($results as $record) {
       $programs[$record->nid] = (empty($programs[$record->nid])) ? 1 : $programs[$record->nid] + 1;
+      if ($programs[$record->nid] > $criteria_count) {
+        $programs[$record->nid] = $criteria_count;
+      }
     }
 
   }
@@ -142,12 +144,13 @@ function gsb_feature_programs_list_fpp_fieldable_panels_pane_view($entity, $view
 
     $query->condition('pc.field_program_category_tid', $category_ids, 'IN');
 
-    $query->orderBy('created', 'DESC');
-    $query->orderBy('nid', 'DESC');
     $results = $query->execute();
 
     foreach ($results as $record) {
       $programs[$record->nid] = (empty($programs[$record->nid])) ? 1 : $programs[$record->nid] + 1;
+      if ($programs[$record->nid] > $criteria_count) {
+        $programs[$record->nid] = $criteria_count;
+      }
     }
 
   }
