@@ -115,7 +115,7 @@ function gsb_feature_programs_list_fpp_fieldable_panels_pane_view($entity, $view
   }
 
   // Next look-up the most current program instances related to each of these programs
-  $program_instances = _gsb_feature_program_ct_get_current_program_instances(array_keys($programs));
+  $program_instances = _gsb_feature_program_ct_get_current_program_instances_ids(array_keys($programs));
 
   // Only keep the top 3 program instances
   $explore_instances = array();
